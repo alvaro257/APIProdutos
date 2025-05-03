@@ -1,0 +1,6 @@
+# Ignora arquivos .db
+*.db
+
+# Ignora o __pycache__
+__pycache__/
+*.pyc
