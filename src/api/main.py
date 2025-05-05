@@ -66,7 +66,33 @@ def cadastrar_produto():
         return jsonify({"erro": f"Erro ao cadastrar produto: {e}"}), 500
     finally:
         conectar.close()
-    
+
+@app.route("/produtos/<int:id>", methods=["PUT"])
+def atualizar_produto(id):
+    try:
+        dados = request.get_json()
+        
+        conectar = conectar_banco()
+        cursor = conectar.cursor()
+        
+        campos = ["cdbarras", "nome", "quantidade", "preco"]
+        campos_validos = [campo for campo in campos if campo in dados]
+        
+        if not campos_validos:
+            return jsonify({"erro": "Nenhum dado válido enviado para atualização."}), 400
+        
+        query = f"UPDATE produtos SET {",".join([f'{campo} = ?' for campo in campos_validos])} WHERE id = ?"
+        valores = [dados[campo] for campo in campos_validos]
+        valores.append(id)
+        
+        cursor.execute(query, valores)
+        conectar.commit()
+
+        return jsonify({"mensagem": "Produto atualizado com sucesso!"}), 200
+    except Error as e:
+        return jsonify({"erro": f"Ocorreu um erro ao atualizar: {e}"}), 400
+    finally:
+        conectar.close()
 
 
 if __name__ == "__main__":
