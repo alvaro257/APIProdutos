@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from sqlite3 import Error
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from database.criar_banco import conectar_banco
 
 app = Flask(__name__)
@@ -34,6 +34,39 @@ def produtos():
     finally:
         conectar.close()
 
+@app.route("/produtos", methods=["POST"])
+def cadastrar_produto():
+    try:
+        dados = request.get_json()
+        
+        campos_obrigatorios = ["cdbarras", "nome", "quantidade", "preco"]
+        
+        for campo in campos_obrigatorios:
+            if campo not in dados:
+                return jsonify({"erro": f"Campo obrigatório '{campo}' não informado."}), 400
+        
+        conectar = conectar_banco()
+        cursor = conectar.cursor()
+        
+        cursor.execute(
+            """ 
+            INSERT INTO produtos (cdbarras, nome, quantidade, preco) VALUES (?, ?, ?, ?)
+            """,
+            (
+                dados["cdbarras"],
+                dados["nome"],
+                dados["quantidade"],
+                dados["preco"]
+            )
+        )
+        
+        conectar.commit()
+        return jsonify({"mensagem": "Produto cadastrado com sucesso!"}), 201
+    except Error as e:
+        return jsonify({"erro": f"Erro ao cadastrar produto: {e}"}), 500
+    finally:
+        conectar.close()
+    
 
 
 if __name__ == "__main__":
