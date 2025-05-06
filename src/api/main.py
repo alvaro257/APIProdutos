@@ -94,6 +94,23 @@ def atualizar_produto(id):
     finally:
         conectar.close()
 
+@app.route("/produtos/<int:id>", methods=["DELETE"])
+def apagar_produto(id):
+    try:
+        conectar = conectar_banco()
+        cursor = conectar.cursor()
+        
+        cursor.execute("DELETE FROM produtos WHERE id = ?",(id,))
+        conectar.commit()
+        
+        if cursor.rowcount == 0:
+            return jsonify({"mensagem": "Produto não encontrado."}), 404
+        
+        return jsonify({"mensagem": "Produto apagado com sucesso!"}), 200
+    except Error as e:
+        return jsonify({"erro": f"Ocorreu um erro ao apagar produto: {e}"}), 500
+    finally:
+        conectar.close()
 
 if __name__ == "__main__":
     from database.criar_banco import criar_banco
