@@ -111,6 +111,33 @@ def apagar_produto(id):
         return jsonify({"erro": f"Ocorreu um erro ao apagar produto: {e}"}), 500
     finally:
         conectar.close()
+        
+@app.route("/produtos/<int:id>", methods=["GET"])
+def buscar_produto(id):
+    try:
+        conectar = conectar_banco()
+        cursor = conectar.cursor()
+        
+        cursor.execute("SELECT * FROM produtos WHERE id = ?",(id,))
+        dados = cursor.fetchone()
+        
+        if dados is None:
+            return jsonify({"mensagem": "Produto não encontrado."}), 404
+        
+        produto = {
+            "id": dados[0],
+            "cdbarras": dados[1],
+            "nome": dados[2],
+            "quantidade": dados[3],
+            "preco": dados[4]
+        }
+        
+        return jsonify(produto), 200
+    except Error as e:
+        return jsonify({"erro": f"Ocorreu um erro ao buscar o produto: {e}"}), 500
+    finally:
+        conectar.close()
+    
 
 if __name__ == "__main__":
     from database.criar_banco import criar_banco
