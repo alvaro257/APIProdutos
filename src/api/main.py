@@ -81,7 +81,7 @@ def atualizar_produto(id):
         if not campos_validos:
             return jsonify({"erro": "Nenhum dado válido enviado para atualização."}), 400
         
-        query = f"UPDATE produtos SET {",".join([f'{campo} = ?' for campo in campos_validos])} WHERE id = ?"
+        query = f"UPDATE produtos SET {', '.join([f'{campo} = ?' for campo in campos_validos])} WHERE id = ?"
         valores = [dados[campo] for campo in campos_validos]
         valores.append(id)
         
